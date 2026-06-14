@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Swiss International Cadet College</title>
+<style>
+  :root{
+    --navy:#0c2b4a;
+    --navy-deep:#081d33;
+    --gold:#c9a227;
+    --gold-light:#e9d28a;
+    --paper:#f6f3ec;
+    --line:#dcd5c4;
+    --ink:#1f2a37;
+    --muted:#6b7280;
+    --green:#1d6f42;
+    --red:#b3261e;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  header{
+    background:linear-gradient(120deg,var(--navy) 0%,var(--navy-deep) 100%);
+    color:#fff;
+    padding:18px 20px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border-bottom:4px solid var(--gold);
+  }
+  .crest{
+    width:52px;height:52px;border-radius:50%;
+    background:var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:var(--navy-deep);font-size:20px;
+    flex-shrink:0;
+    border:2px solid var(--gold-light);
+  }
+  header .titles h1{margin:0;font-size:18px;letter-spacing:.5px;}
+  header .titles p{margin:2px 0 0;font-size:12px;color:var(--gold-light);}
+  #connStatus{
+    margin-left:auto;font-size:11px;padding:4px 10px;border-radius:99px;
+    background:rgba(255,255,255,.12);white-space:nowrap;
+  }
+  #connStatus.ok{color:#bdf0d0;}
+  #connStatus.bad{color:#f7c9c7;}
+  nav{
+    display:flex;
+    flex-wrap:wrap;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:10;
+  }
+  nav button{
+    flex:1 1 auto;
+    min-width:110px;
+    padding:12px 8px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600;
+    color:var(--muted);
+    border-bottom:3px solid transparent;
+    transition:.15s;
+  }
+  nav button.active{
+    color:var(--navy);
+    border-bottom:3px solid var(--gold);
+    background:var(--paper);
+  }
+  nav button:hover{color:var(--navy);}
+  main{
+    max-width:960px;
+    margin:0 auto;
+    padding:18px;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:16px;
+  }
+  .card h2{
+    margin:0 0 12px;
+    font-size:16px;
+    color:var(--navy);
+    border-left:4px solid var(--gold);
+    padding-left:10px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:10px;
+    margin-bottom:12px;
+  }
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;}
+  input,select,textarea{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-size:14px;
+    background:#fff;
+    color:var(--ink);
+  }
+  input:focus,select:focus,textarea:focus{
+    outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,162,39,.2);
+  }
+  .btn{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    padding:9px 16px;
+    border-radius:6px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .btn:hover{background:var(--navy-deep);}
+  .btn.gold{background:var(--gold);color:var(--navy-deep);}
+  .btn.gold:hover{background:var(--gold-light);}
+  .btn.danger{background:var(--red);}
+  .btn.danger:hover{background:#8f1f19;}
+  .btn:disabled{opacity:.6;cursor:not-allowed;}
+  .btn-sm{padding:5px 10px;font-size:12px;border-radius:5px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px;}
+  tr:hover td{background:var(--paper);}
+  .empty{
+    text-align:center;color:var(--muted);padding:24px 10px;font-size:13px;
+  }
+  .pill{
+    display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;
+  }
+  .pill.present{background:#e2f3ea;color:var(--green);}
+  .pill.absent{background:#fbe7e6;color:var(--red);}
+  .pill.leave{background:#fdf3da;color:#8a6d1d;}
+  .pill.paid{background:#e2f3ea;color:var(--green);cursor:pointer;}
+  .pill.unpaid{background:#fbe7e6;color:var(--red);cursor:pointer;}
+  .row-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .stat{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px;text-align:center;
+  }
+  .stat .num{font-size:24px;font-weight:700;color:var(--navy);}
+  .stat .lbl{font-size:12px;color:var(--muted);margin-top:4px;}
+  footer{
+    text-align:center;
+    padding:18px;
+    font-size:12px;
+    color:var(--muted);
+    border-top:1px solid var(--line);
+    margin-top:24px;
+  }
+  footer strong{color:var(--navy);}
+  .table-wrap{overflow-x:auto;}
+  .form-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .small-note{font-size:12px;color:var(--muted);margin-top:6px;}
+  .error-msg{
+    background:#fbe7e6;color:var(--red);padding:8px 12px;border-radius:6px;
+    font-size:13px;margin-bottom:10px;display:none;
+  }
+  .loading{font-size:13px;color:var(--muted);padding:10px 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crest">SC</div>
+  <div class="titles">
+    <h1>Swiss International Cadet College</h1>
+    <p>Principal: Hafiz Muhammad &nbsp;•&nbsp; School Management System</p>
+  </div>
+  <div id="connStatus">Checking server...</div>
+</header>
+
+<nav id="navTabs">
+  <button data-tab="dashboard" class="active">Dashboard</button>
+  <button data-tab="teachers">Teachers</button>
+  <button data-tab="attendance">Attendance</button>
+  <button data-tab="fees">Fees</button>
+  <button data-tab="homework">Homework</button>
+  <button data-tab="results">Results</button>
+</nav>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <section class="panel active" id="dashboard">
+    <div class="stats">
+      <div class="stat"><div class="num" id="statTeachers">-</div><div class="lbl">Teachers</div></div>
+      <div class="stat"><div class="num" id="statStudents">-</div><div class="lbl">Students (Attendance)</div></div>
+      <div class="stat"><div class="num" id="statFeesUnpaid">-</div><div class="lbl">Unpaid Fee Records</div></div>
+      <div class="stat"><div class="num" id="statHomework">-</div><div class="lbl">Homework Entries</div></div>
+      <div class="stat"><div class="num" id="statResults">-</div><div class="lbl">Result Entries</div></div>
+    </div>
+    <div class="card">
+      <h2>Welcome</h2>
+      <p>This system helps the administration of Swiss International Cadet College manage teacher records, student attendance, fee status, homework assignments, and academic results — all in one place.</p>
+      <p class="small-note">Data is stored on the backend server (SQLite database). Make sure the backend is running and the API URL in <code>config.js</code> is correct.</p>
+    </div>
+  </section>
+
+  <!-- TEACHERS -->
+  <section class="panel" id="teachers">
+    <div class="error-msg" id="teacherError"></div>
+    <div class="card">
+      <h2>Add Teacher</h2>
+      <div class="grid">
+        <div><label>Full Name</label><input id="t_name" placeholder="e.g. Ayesha Khan"></div>
+        <div><label>Subject</label><input id="t_subject" placeholder="e.g. Mathematics"></div>
+        <div><label>Class Assigned</label><input id="t_class" placeholder="e.g. Class 8-A"></div>
+        <div><label>Contact Number</label><input id="t_contact" placeholder="e.g. 0300-1234567"></div>
+        <div><label>Qualification</label><input id="t_qual" placeholder="e.g. M.Sc, B.Ed"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn gold" onclick="addTeacher()" id="t_submit">Add Teacher</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Teacher List</h2>
+      <div class="table-wrap">
+        <div class="loading" id="teacherLoading">Loading...</div>
+        <table id="teacherTable" style="display:none;">
+          <thead><tr><th>Name</th><th>Subject</th><th>Class</th><th>Contact</th><th>Qualification</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="empty" id="teacherEmpty" style="display:none;">No teachers added yet.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section class="panel" id="attendance">
+    <div class="error-msg" id="attendanceError"></div>
+    <div class="card">
+      <h2>Mark Attendance</h2>
+      <div class="grid">
+        <div><label>Student Name</label><input id="a_name" placeholder="e.g. Ali Hassan"></div>
+        <div><label>Class</label><input id="a_class" placeholder="e.g. Class 6-B"></div>
+        <div><label>Date</label><input type="date" id="a_date"></div>
+        <div><label>Status</label>
+          <select id="a_status">
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            <option value="Leave">Leave</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn gold" onclick="addAttendance()" id="a_submit">Save Record</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Attendance Records</h2>
+      <div class="table-wrap">
+        <div class="loading" id="attendanceLoading">Loading...</div>
+        <table id="attendanceTable" style="display:none;">
+          <thead><tr><th>Name</th><th>Class</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="empty" id="attendanceEmpty" style="display:none;">No attendance records yet.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEES -->
+  <section class="panel" id="fees">
+    <div class="error-msg" id="feeError"></div>
+    <div class="card">
+      <h2>Add Fee Record</h2>
+      <div class="grid">
+        <div><label>Student Name</label><input id="f_name" placeholder="e.g. Sara Ahmed"></div>
+        <div><label>Class</label><input id="f_class" placeholder="e.g. Class 5-A"></div>
+        <div><label>Month</label><input id="f_month" placeholder="e.g. June 2026"></div>
+        <div><label>Amount (PKR)</label><input type="number" id="f_amount" placeholder="e.g. 5000"></div>
+        <div><label>Status</label>
+          <select id="f_status">
+            <option value="Unpaid">Unpaid</option>
+            <option value="Paid">Paid</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn gold" onclick="addFee()" id="f_submit">Add Record</button>
+      </div>
+      <p class="small-note">Tip: click on a status badge in the table below to toggle Paid/Unpaid.</p>
+    </div>
+    <div class="card">
+      <h2>Fee Records</h2>
+      <div class="table-wrap">
+        <div class="loading" id="feeLoading">Loading...</div>
+        <table id="feeTable" style="display:none;">
+          <thead><tr><th>Name</th><th>Class</th><th>Month</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="empty" id="feeEmpty" style="display:none;">No fee records yet.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOMEWORK -->
+  <section class="panel" id="homework">
+    <div class="error-msg" id="homeworkError"></div>
+    <div class="card">
+      <h2>Assign Homework</h2>
+      <div class="grid">
+        <div><label>Class</label><input id="h_class" placeholder="e.g. Class 7-C"></div>
+        <div><label>Subject</label><input id="h_subject" placeholder="e.g. English"></div>
+        <div><label>Due Date</label><input type="date" id="h_date"></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label>Description</label>
+        <textarea id="h_desc" rows="3" placeholder="e.g. Complete exercise 5 from page 42"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn gold" onclick="addHomework()" id="h_submit">Assign Homework</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Homework List</h2>
+      <div class="table-wrap">
+        <div class="loading" id="homeworkLoading">Loading...</div>
+        <table id="homeworkTable" style="display:none;">
+          <thead><tr><th>Class</th><th>Subject</th><th>Description</th><th>Due Date</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="empty" id="homeworkEmpty" style="display:none;">No homework assigned yet.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="panel" id="results">
+    <div class="error-msg" id="resultError"></div>
+    <div class="card">
+      <h2>Add Result</h2>
+      <div class="grid">
+        <div><label>Student Name</label><input id="r_name" placeholder="e.g. Bilal Tariq"></div>
+        <div><label>Class</label><input id="r_class" placeholder="e.g. Class 9-A"></div>
+        <div><label>Subject</label><input id="r_subject" placeholder="e.g. Physics"></div>
+        <div><label>Marks Obtained</label><input type="number" id="r_obtained" placeholder="e.g. 85"></div>
+        <div><label>Total Marks</label><input type="number" id="r_total" placeholder="e.g. 100"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn gold" onclick="addResult()" id="r_submit">Add Result</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Result Records</h2>
+      <div class="table-wrap">
+        <div class="loading" id="resultLoading">Loading...</div>
+        <table id="resultTable" style="display:none;">
+          <thead><tr><th>Name</th><th>Class</th><th>Subject</th><th>Marks</th><th>Percentage</th><th>Grade</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="empty" id="resultEmpty" style="display:none;">No result records yet.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Swiss International Cadet College &nbsp;|&nbsp; Principal: <strong>Hafiz Muhammad</strong><br>
+  App created by <strong>Hasnain</strong> &amp; <strong>Bilal Azam</strong>
+</footer>
+
+<script src="config.js"></script>
+<script>
+// ---------- Navigation ----------
+const tabs = document.querySelectorAll('#navTabs button');
+const panels = document.querySelectorAll('.panel');
+tabs.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    panels.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---------- API helper ----------
+async function api(path, options = {}) {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options
+  });
+  let data;
+  try { data = await res.json(); } catch { data = null; }
+  if (!res.ok) {
+    throw new Error((data && data.error) || `Request failed (${res.status})`);
+  }
+  return data;
+}
+
+function showError(elId, message){
+  const el = document.getElementById(elId);
+  el.textContent = message;
+  el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 5000);
+}
+
+function esc(str){
+  if(str===undefined||str===null) return '';
+  return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function setBusy(btnId, busy, label){
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  btn.disabled = busy;
+  if(busy){ btn.dataset.label = btn.textContent; btn.textContent = 'Saving...'; }
+  else { btn.textContent = btn.dataset.label || label; }
+}
+
+// ---------- Connection check ----------
+async function checkConnection(){
+  const el = document.getElementById('connStatus');
+  try{
+    await api('/');
+    el.textContent = 'Server connected';
+    el.className = 'ok';
+  }catch(e){
+    el.textContent = 'Server offline';
+    el.className = 'bad';
+  }
+}
+
+// ---------- DASHBOARD ----------
+async function loadStats(){
+  try{
+    const stats = await api('/api/stats');
+    document.getElementById('statTeachers').textContent = stats.teachers;
+    document.getElementById('statStudents').textContent = stats.students;
+    document.getElementById('statFeesUnpaid').textContent = stats.unpaidFees;
+    document.getElementById('statHomework').textContent = stats.homework;
+    document.getElementById('statResults').textContent = stats.results;
+  }catch(e){
+    // leave dashes if server is offline
+  }
+}
+
+// ---------- TEACHERS ----------
+async function loadTeachers(){
+  const loading = document.getElementById('teacherLoading');
+  const table = document.getElementById('teacherTable');
+  const empty = document.getElementById('teacherEmpty');
+  loading.style.display='block'; table.style.display='none'; empty.style.display='none';
+  try{
+    const list = await api('/api/teachers');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML='';
+    if(list.length===0){ empty.style.display='block'; }
+    else{
+      table.style.display='table';
+      list.forEach(t=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML = `<td>${esc(t.name)}</td><td>${esc(t.subject)}</td><td>${esc(t.class)}</td><td>${esc(t.contact)}</td><td>${esc(t.qualification)}</td>
+          <td><button class="btn danger btn-sm" onclick="deleteTeacher(${t.id})">Remove</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  }catch(e){
+    showError('teacherError', 'Could not load teachers: ' + e.message);
+    empty.style.display='block';
+    empty.textContent = 'Unable to load data. Check server connection.';
+  }finally{
+    loading.style.display='none';
+  }
+}
+
+async function addTeacher(){
+  const name=document.getElementById('t_name').value.trim();
+  const subject=document.getElementById('t_subject').value.trim();
+  const cls=document.getElementById('t_class').value.trim();
+  const contact=document.getElementById('t_contact').value.trim();
+  const qual=document.getElementById('t_qual').value.trim();
+  if(!name||!subject){ showError('teacherError','Please enter at least the teacher name and subject.'); return; }
+  setBusy('t_submit', true);
+  try{
+    await api('/api/teachers', { method:'POST', body: JSON.stringify({ name, subject, class: cls, contact, qualification: qual }) });
+    ['t_name','t_subject','t_class','t_contact','t_qual'].forEach(id=>document.getElementById(id).value='');
+    await loadTeachers();
+    await loadStats();
+  }catch(e){
+    showError('teacherError', e.message);
+  }finally{
+    setBusy('t_submit', false, 'Add Teacher');
+  }
+}
+
+async function deleteTeacher(id){
+  if(!confirm('Remove this teacher?')) return;
+  try{
+    await api(`/api/teachers/${id}`, { method:'DELETE' });
+    await loadTeachers();
+    await loadStats();
+  }catch(e){
+    showError('teacherError', e.message);
+  }
+}
+
+// ---------- ATTENDANCE ----------
+async function loadAttendance(){
+  const loading = document.getElementById('attendanceLoading');
+  const table = document.getElementById('attendanceTable');
+  const empty = document.getElementById('attendanceEmpty');
+  loading.style.display='block'; table.style.display='none'; empty.style.display='none';
+  try{
+    const list = await api('/api/attendance');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML='';
+    if(list.length===0){ empty.style.display='block'; }
+    else{
+      table.style.display='table';
+      list.forEach(a=>{
+        const pillClass = a.status==='Present'?'present':(a.status==='Absent'?'absent':'leave');
+        const tr=document.createElement('tr');
+        tr.innerHTML = `<td>${esc(a.student_name)}</td><td>${esc(a.class)}</td><td>${esc(a.date)}</td>
+          <td><span class="pill ${pillClass}">${a.status}</span></td>
+          <td><button class="btn danger btn-sm" onclick="deleteAttendance(${a.id})">Remove</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  }catch(e){
+    showError('attendanceError', 'Could not load attendance: ' + e.message);
+    empty.style.display='block';
+    empty.textContent = 'Unable to load data. Check server connection.';
+  }finally{
+    loading.style.display='none';
+  }
+}
+
+async function addAttendance(){
+  const student_name=document.getElementById('a_name').value.trim();
+  const cls=document.getElementById('a_class').value.trim();
+  const date=document.getElementById('a_date').value;
+  const status=document.getElementById('a_status').value;
+  if(!student_name||!date){ showError('attendanceError','Please enter student name and date.'); return; }
+  setBusy('a_submit', true);
+  try{
+    await api('/api/attendance', { method:'POST', body: JSON.stringify({ student_name, class: cls, date, status }) });
+    document.getElementById('a_name').value='';
+    document.getElementById('a_class').value='';
+    document.getElementById('a_date').value='';
+    await loadAttendance();
+    await loadStats();
+  }catch(e){
+    showError('attendanceError', e.message);
+  }finally{
+    setBusy('a_submit', false, 'Save Record');
+  }
+}
+
+async function deleteAttendance(id){
+  if(!confirm('Remove this attendance record?')) return;
+  try{
+    await api(`/api/attendance/${id}`, { method:'DELETE' });
+    await loadAttendance();
+    await loadStats();
+  }catch(e){
+    showError('attendanceError', e.message);
+  }
+}
+
+// ---------- FEES ----------
+async function loadFees(){
+  const loading = document.getElementById('feeLoading');
+  const table = document.getElementById('feeTable');
+  const empty = document.getElementById('feeEmpty');
+  loading.style.display='block'; table.style.display='none'; empty.style.display='none';
+  try{
+    const list = await api('/api/fees');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML='';
+    if(list.length===0){ empty.style.display='block'; }
+    else{
+      table.style.display='table';
+      list.forEach(f=>{
+        const pillClass = f.status==='Paid'?'paid':'unpaid';
+        const tr=document.createElement('tr');
+        tr.innerHTML = `<td>${esc(f.student_name)}</td><td>${esc(f.class)}</td><td>${esc(f.month)}</td><td>PKR ${Number(f.amount).toLocaleString()}</td>
+          <td><span class="pill ${pillClass}" onclick="toggleFeeStatus(${f.id}, '${f.status}')" title="Click to toggle">${f.status}</span></td>
+          <td><button class="btn danger btn-sm" onclick="deleteFee(${f.id})">Remove</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  }catch(e){
+    showError('feeError', 'Could not load fees: ' + e.message);
+    empty.style.display='block';
+    empty.textContent = 'Unable to load data. Check server connection.';
+  }finally{
+    loading.style.display='none';
+  }
+}
+
+async function addFee(){
+  const student_name=document.getElementById('f_name').value.trim();
+  const cls=document.getElementById('f_class').value.trim();
+  const month=document.getElementById('f_month').value.trim();
+  const amount=document.getElementById('f_amount').value;
+  const status=document.getElementById('f_status').value;
+  if(!student_name||!month||!amount){ showError('feeError','Please fill in name, month, and amount.'); return; }
+  setBusy('f_submit', true);
+  try{
+    await api('/api/fees', { method:'POST', body: JSON.stringify({ student_name, class: cls, month, amount: Number(amount), status }) });
+    ['f_name','f_class','f_month','f_amount'].forEach(id=>document.getElementById(id).value='');
+    await loadFees();
+    await loadStats();
+  }catch(e){
+    showError('feeError', e.message);
+  }finally{
+    setBusy('f_submit', false, 'Add Record');
+  }
+}
+
+async function toggleFeeStatus(id, currentStatus){
+  const newStatus = currentStatus === 'Paid' ? 'Unpaid' : 'Paid';
+  try{
+    await api(`/api/fees/${id}`, { method:'PUT', body: JSON.stringify({ status: newStatus }) });
+    await loadFees();
+    await loadStats();
+  }catch(e){
+    showError('feeError', e.message);
+  }
+}
+
+async function deleteFee(id){
+  if(!confirm('Remove this fee record?')) return;
+  try{
+    await api(`/api/fees/${id}`, { method:'DELETE' });
+    await loadFees();
+    await loadStats();
+  }catch(e){
+    showError('feeError', e.message);
+  }
+}
+
+// ---------- HOMEWORK ----------
+async function loadHomework(){
+  const loading = document.getElementById('homeworkLoading');
+  const table = document.getElementById('homeworkTable');
+  const empty = document.getElementById('homeworkEmpty');
+  loading.style.display='block'; table.style.display='none'; empty.style.display='none';
+  try{
+    const list = await api('/api/homework');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML='';
+    if(list.length===0){ empty.style.display='block'; }
+    else{
+      table.style.display='table';
+      list.forEach(h=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML = `<td>${esc(h.class)}</td><td>${esc(h.subject)}</td><td>${esc(h.description)}</td><td>${esc(h.due_date)}</td>
+          <td><button class="btn danger btn-sm" onclick="deleteHomework(${h.id})">Remove</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  }catch(e){
+    showError('homeworkError', 'Could not load homework: ' + e.message);
+    empty.style.display='block';
+    empty.textContent = 'Unable to load data. Check server connection.';
+  }finally{
+    loading.style.display='none';
+  }
+}
+
+async function addHomework(){
+  const cls=document.getElementById('h_class').value.trim();
+  const subject=document.getElementById('h_subject').value.trim();
+  const date=document.getElementById('h_date').value;
+  const desc=document.getElementById('h_desc').value.trim();
+  if(!cls||!subject||!desc){ showError('homeworkError','Please fill in class, subject, and description.'); return; }
+  setBusy('h_submit', true);
+  try{
+    await api('/api/homework', { method:'POST', body: JSON.stringify({ class: cls, subject, description: desc, due_date: date }) });
+    ['h_class','h_subject','h_date','h_desc'].forEach(id=>document.getElementById(id).value='');
+    await loadHomework();
+    await loadStats();
+  }catch(e){
+    showError('homeworkError', e.message);
+  }finally{
+    setBusy('h_submit', false, 'Assign Homework');
+  }
+}
+
+async function deleteHomework(id){
+  if(!confirm('Remove this homework entry?')) return;
+  try{
+    await api(`/api/homework/${id}`, { method:'DELETE' });
+    await loadHomework();
+    await loadStats();
+  }catch(e){
+    showError('homeworkError', e.message);
+  }
+}
+
+// ---------- RESULTS ----------
+async function loadResults(){
+  const loading = document.getElementById('resultLoading');
+  const table = document.getElementById('resultTable');
+  const empty = document.getElementById('resultEmpty');
+  loading.style.display='block'; table.style.display='none'; empty.style.display='none';
+  try{
+    const list = await api('/api/results');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML='';
+    if(list.length===0){ empty.style.display='block'; }
+    else{
+      table.style.display='table';
+      list.forEach(r=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML = `<td>${esc(r.student_name)}</td><td>${esc(r.class)}</td><td>${esc(r.subject)}</td><td>${r.obtained_marks}/${r.total_marks}</td>
+          <td>${r.percentage}%</td><td>${r.grade}</td>
+          <td><button class="btn danger btn-sm" onclick="deleteResult(${r.id})">Remove</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  }catch(e){
+    showError('resultError', 'Could not load results: ' + e.message);
+    empty.style.display='block';
+    empty.textContent = 'Unable to load data. Check server connection.';
+  }finally{
+    loading.style.display='none';
+  }
+}
+
+async function addResult(){
+  const student_name=document.getElementById('r_name').value.trim();
+  const cls=document.getElementById('r_class').value.trim();
+  const subject=document.getElementById('r_subject').value.trim();
+  const obtained=document.getElementById('r_obtained').value;
+  const total=document.getElementById('r_total').value;
+  if(!student_name||!subject||obtained===''||total===''||Number(total)<=0){ showError('resultError','Please fill all result fields correctly.'); return; }
+  setBusy('r_submit', true);
+  try{
+    await api('/api/results', { method:'POST', body: JSON.stringify({ student_name, class: cls, subject, obtained_marks: Number(obtained), total_marks: Number(total) }) });
+    ['r_name','r_class','r_subject','r_obtained','r_total'].forEach(id=>document.getElementById(id).value='');
+    await loadResults();
+    await loadStats();
+  }catch(e){
+    showError('resultError', e.message);
+  }finally{
+    setBusy('r_submit', false, 'Add Result');
+  }
+}
+
+async function deleteResult(id){
+  if(!confirm('Remove this result?')) return;
+  try{
+    await api(`/api/results/${id}`, { method:'DELETE' });
+    await loadResults();
+    await loadStats();
+  }catch(e){
+    showError('resultError', e.message);
+  }
+}
+
+// ---------- INIT ----------
+checkConnection();
+loadStats();
+loadTeachers();
+loadAttendance();
+loadFees();
+loadHomework();
+loadResults();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "swiss-cadet-college",
+  "version": "1.0.0",
+  "description": "Swiss International Cadet College Management System",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "install-backend": "cd backend && npm install"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "better-sqlite3": "^11.3.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
+  }
+}
