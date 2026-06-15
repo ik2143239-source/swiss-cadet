@@ -399,7 +399,6 @@ tabs.forEach(btn=>{
   });
 });
 
-const API_BASE_URL = "https://swisscadet.bonto.run";
 // ---------- API helper ----------
 async function api(path, options = {}) {
   const res = await fetch(`${API_BASE_URL}${path}`, {
